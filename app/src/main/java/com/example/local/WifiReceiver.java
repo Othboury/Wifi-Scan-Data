@@ -33,9 +33,10 @@ class WifiReceiver extends BroadcastReceiver {
     StringBuilder sb;
     ListView wifiDeviceList;
     ArrayList<String> deviceList = new ArrayList<>();
-    private String filename = "SampleFile.txt";
-    private String filepath = "MyFileStorage";
-    File myExternalFile;
+    int batimentId = 1;
+    String salleId = "N/A";
+    String floorId= "Empty";
+    int positionId = 0;
 
 
     public WifiReceiver(WifiManager wifiManager, ListView wifiDeviceList) {
@@ -46,20 +47,18 @@ class WifiReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
+            positionId++;
             sb = new StringBuilder();
             List<ScanResult> wifiList = wifiManager.getScanResults();
             for (ScanResult scanResult : wifiList) {
-                sb.append("\n").append("BSSID : ").append(scanResult.BSSID).append("\n").append("SSID : ").append(scanResult.SSID).append("\n")
-                        .append("Frequency : ").append(scanResult.frequency).append("\n").append("Level : ").append(scanResult.level)
-                        .append("\n").append("CenterFreq0 : ").append(scanResult.centerFreq0).append("\n");
-                deviceList.add(scanResult.SSID + " - " + scanResult.capabilities);
+                sb.append("\n").append(batimentId).append(",").append(salleId).append(",").append(floorId).append(",").append(positionId)
+                        .append(",").append(scanResult.SSID).append(",").append(scanResult.BSSID).append(",").append(scanResult.level)
+                        .append(",").append(scanResult.centerFreq0).append(",").append(scanResult.frequency);
             }
-
         }
     }
 
-    public String Show(){
-        System.out.println(sb);
+    public String ShowString(){
         return sb.toString();
     }
 

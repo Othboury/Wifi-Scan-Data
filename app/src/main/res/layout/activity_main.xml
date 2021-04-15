@@ -25,7 +25,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="Room Number"
+        android:hint="Salle (Ex: 12)"
+        android:inputType="textPersonName" />
+
+    <EditText
+        android:id="@+id/floorText"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="100dp"
+        android:ems="10"
+        android:hint="Etage (Ex: 2)"
         android:inputType="textPersonName" />
 
 </RelativeLayout>
