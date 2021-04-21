@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     Button buttonScan;
     String filename;
     Button httpButton;
+    String resultBuilding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,45 +77,6 @@ public class MainActivity extends AppCompatActivity {
         buttonScan.setEnabled(false);
         textFloor.setEnabled(false);
         textBuilding.setEnabled(false);
-
-
-        httpButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new HTTPReqTask().execute();
-            }
-        });
-
-        /*try {
-            URL url = new URL("http://127.0.0.1:8091/android/utilisateurs");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-            conn.setReadTimeout(10000);
-            conn.setConnectTimeout(15000);
-            conn.setRequestMethod("GET");
-            conn.setDoInput(true);
-            //conn.setDoOutput(true);
-            Uri.Builder builder = new Uri.Builder()
-                    .appendQueryParameter("p1", "123")
-                    .appendQueryParameter("p2", "123");
-            String query = builder.build().getEncodedQuery();
-            OutputStream os = conn.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(os, "UTF-8"));
-            writer.write(query);
-            writer.flush();
-            writer.close();
-            os.close();
-
-            conn.connect();
-            Log.e("ERROR", conn.getResponseMessage());
-            Log.e("ERROR", conn.getRequestMethod());
-            Log.e("ERROR", String.valueOf(conn.getResponseCode()));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-
 
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
@@ -180,68 +142,15 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Batiment: " + buildingNumber, Toast.LENGTH_LONG).show();
             }
         });
+
+        httpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                httpReq();
+            }
+        });
     }
 
-    public void httpCon(){
-        HttpURLConnection c = null;
-
-        URL u = null;
-        try {
-            u = new URL( "http://127.0.0.1:8091/android/utilisateurs");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        try {
-            c = (HttpURLConnection) u.openConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            c.setRequestMethod("GET");
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        }
-        /* c.setRequestProperty("Content-Type", "application/json; utf-8");*/
-        c.setRequestProperty("Accept", "application/json");
-        try {
-            c.connect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        int status = 0;
-        try {
-            status = c.getResponseCode();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println(status);
-        switch (status) {
-            case 200:
-            case 201:
-                BufferedReader br = null;
-                try {
-                    br = new BufferedReader(new InputStreamReader(c.getInputStream(), StandardCharsets.UTF_8));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                StringBuilder sb = new StringBuilder();
-                String line = null;
-                while (true) {
-                    try {
-                        if (!((line = br.readLine()) != null)) break;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    sb.append(line);
-                }
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(sb.toString());
-        }
-    }
     public void enableBtnStartScan(){
         buttonScan.setEnabled(true);
     }
@@ -256,6 +165,10 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    public void httpReq(){
+        new HTTPReqTaskP().execute(receiverWifi.jsList());
     }
 
     public void launchScan(){
@@ -304,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                         String buildingToReplace = "NoBat";
                         Pattern patternBuilding = Pattern.compile(buildingToReplace);
                         Matcher matcherBuilding = patternBuilding.matcher(resultFloor);
-                        String resultBuilding = matcherBuilding.replaceAll(buildingNumber);
+                        resultBuilding = matcherBuilding.replaceAll(buildingNumber);
                         if(fileExists(MainActivity.this, filename)){
                             try {
                                 FileOutputStream fOut = openFileOutput(filename,  MODE_APPEND);

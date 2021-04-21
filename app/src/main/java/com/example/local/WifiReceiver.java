@@ -15,6 +15,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.gson.JsonObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,14 +39,18 @@ class WifiReceiver extends BroadcastReceiver {
     String salleId = "N/A";
     String floorId= "Empty";
     int positionId = 0;
-
+    JsonObject combined= new JsonObject();
 
     public WifiReceiver(WifiManager wifiManager, ListView wifiDeviceList) {
         this.wifiManager = wifiManager;
         this.wifiDeviceList = wifiDeviceList;
     }
 
+    public WifiReceiver() {
+    }
+
     public void onReceive(Context context, Intent intent) {
+        int i =0;
         String action = intent.getAction();
         if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
             positionId++;
@@ -54,12 +60,30 @@ class WifiReceiver extends BroadcastReceiver {
                 sb.append("\n").append(batimentId).append(",").append(salleId).append(",").append(floorId).append(",").append(positionId)
                         .append(",").append(scanResult.SSID).append(",").append(scanResult.BSSID).append(",").append(scanResult.level)
                         .append(",").append(scanResult.centerFreq0).append(",").append(scanResult.frequency);
+
+                JsonObject postData= new JsonObject();
+                postData.addProperty("ssid",scanResult.SSID);
+                postData.addProperty("bssid",scanResult.BSSID);
+                postData.addProperty("level",scanResult.level);
+                postData.addProperty("centerFreq0",scanResult.centerFreq0);
+                postData.addProperty("frequency",scanResult.frequency);
+                System.out.println("JSON WIFI RECEIVER: ");
+                System.out.println(postData);
+                combined.add(String.valueOf(i), postData);
+                i++;
             }
+
+            System.out.println("JSON WIFI RECEIVER NO BOUCLE: ");
+            System.out.println(combined);
         }
     }
 
     public String ShowString(){
         return sb.toString();
+    }
+
+    public JsonObject jsList(){
+        return combined;
     }
 
 
