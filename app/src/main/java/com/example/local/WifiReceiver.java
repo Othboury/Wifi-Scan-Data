@@ -33,7 +33,7 @@ class WifiReceiver extends BroadcastReceiver {
     StringBuilder sb;
     ListView wifiDeviceList;
     ArrayList<String> deviceList = new ArrayList<>();
-    int batimentId = 1;
+    String batimentId = "NoBat";
     String salleId = "N/A";
     String floorId= "Empty";
     int positionId = 0;

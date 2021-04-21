@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -28,13 +29,22 @@ import androidx.core.content.ContextCompat;
 
 import com.example.myapplication.R;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,8 +59,10 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> listWifi;
     EditText textRoom;
     EditText textFloor;
+    EditText textBuilding;
     Button buttonScan;
     String filename;
+    Button httpButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +71,50 @@ public class MainActivity extends AppCompatActivity {
         textRoom = findViewById(R.id.roomText);
         buttonScan = findViewById(R.id.scanBtn);
         textFloor = findViewById(R.id.floorText);
+        textBuilding = findViewById(R.id.buildingText);
+        httpButton= findViewById(R.id.btnHttp);
         buttonScan.setEnabled(false);
         textFloor.setEnabled(false);
+        textBuilding.setEnabled(false);
+
+
+        httpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new HTTPReqTask().execute();
+            }
+        });
+
+        /*try {
+            URL url = new URL("http://127.0.0.1:8091/android/utilisateurs");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setDoInput(true);
+            //conn.setDoOutput(true);
+            Uri.Builder builder = new Uri.Builder()
+                    .appendQueryParameter("p1", "123")
+                    .appendQueryParameter("p2", "123");
+            String query = builder.build().getEncodedQuery();
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8"));
+            writer.write(query);
+            writer.flush();
+            writer.close();
+            os.close();
+
+            conn.connect();
+            Log.e("ERROR", conn.getResponseMessage());
+            Log.e("ERROR", conn.getRequestMethod());
+            Log.e("ERROR", String.valueOf(conn.getResponseCode()));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+
 
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
@@ -101,18 +155,100 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 String floorNumber = textFloor.getText().toString();
-                enableBtnStartScan();
+                enableTxtBuilding();
                 launchScan();
                 Toast.makeText(getApplicationContext(), "Etage: " + floorNumber, Toast.LENGTH_LONG).show();
             }
         });
+
+        textBuilding.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String buildingNumber = textBuilding.getText().toString();
+                enableBtnStartScan();
+                launchScan();
+                Toast.makeText(getApplicationContext(), "Batiment: " + buildingNumber, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
+    public void httpCon(){
+        HttpURLConnection c = null;
+
+        URL u = null;
+        try {
+            u = new URL( "http://127.0.0.1:8091/android/utilisateurs");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        try {
+            c = (HttpURLConnection) u.openConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            c.setRequestMethod("GET");
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        }
+        /* c.setRequestProperty("Content-Type", "application/json; utf-8");*/
+        c.setRequestProperty("Accept", "application/json");
+        try {
+            c.connect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int status = 0;
+        try {
+            status = c.getResponseCode();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(status);
+        switch (status) {
+            case 200:
+            case 201:
+                BufferedReader br = null;
+                try {
+                    br = new BufferedReader(new InputStreamReader(c.getInputStream(), StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                while (true) {
+                    try {
+                        if (!((line = br.readLine()) != null)) break;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    sb.append(line);
+                }
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(sb.toString());
+        }
+    }
     public void enableBtnStartScan(){
         buttonScan.setEnabled(true);
     }
 
     public void enableTxtFloor(){textFloor.setEnabled(true);}
+
+    public void enableTxtBuilding(){textBuilding.setEnabled(true);}
 
     public boolean fileExists(Context context, String filename) {
         File file = context.getFileStreamPath(filename);
@@ -132,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     String roomNumber = textRoom.getText().toString();
                     String floorNumber = textFloor.getText().toString();
+                    String buildingNumber = textBuilding.getText().toString();
                     wifiManager.startScan();
 
                     if(receiverWifi.ShowString() == null){
@@ -153,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
                             fullRoomNumber = roomNumber;
                         }
 
-                        filename = "salle-U" + fullRoomNumber + ".txt";
+                        filename = "salle-" + buildingNumber + fullRoomNumber + ".txt";
                         String dataToReplace = "N/A";
                         Pattern pattern = Pattern.compile(dataToReplace);
                         Matcher matcher = pattern.matcher(sb);
@@ -163,11 +300,16 @@ public class MainActivity extends AppCompatActivity {
                         Pattern patternFloor = Pattern.compile(ToReplace);
                         Matcher matcherFloor = patternFloor.matcher(result);
                         String resultFloor = matcherFloor.replaceAll(floorNumber);
+
+                        String buildingToReplace = "NoBat";
+                        Pattern patternBuilding = Pattern.compile(buildingToReplace);
+                        Matcher matcherBuilding = patternBuilding.matcher(resultFloor);
+                        String resultBuilding = matcherBuilding.replaceAll(buildingNumber);
                         if(fileExists(MainActivity.this, filename)){
                             try {
                                 FileOutputStream fOut = openFileOutput(filename,  MODE_APPEND);
                                 OutputStreamWriter osw = new OutputStreamWriter(fOut);
-                                osw.write(resultFloor);
+                                osw.write(resultBuilding);
                                 osw.flush();
                                 osw.close();
                             } catch (IOException e) {
@@ -176,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
                         }else {
                             try {
                                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(getApplicationContext().openFileOutput(filename, Context.MODE_PRIVATE));
-                                outputStreamWriter.write(header+resultFloor);
+                                outputStreamWriter.write(header+resultBuilding);
                                 outputStreamWriter.close();
                             } catch (IOException e) {
                                 Log.e("Exception", "File write failed: " + e.toString());
