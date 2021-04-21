@@ -30,11 +30,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * This class extends from BroadcastReceiver
+ *
+ */
+
 class WifiReceiver extends BroadcastReceiver {
     WifiManager wifiManager;
     StringBuilder sb;
     ListView wifiDeviceList;
-    ArrayList<String> deviceList = new ArrayList<>();
     String batimentId = "NoBat";
     String salleId = "N/A";
     String floorId= "Empty";
@@ -46,8 +51,14 @@ class WifiReceiver extends BroadcastReceiver {
         this.wifiDeviceList = wifiDeviceList;
     }
 
-    public WifiReceiver() {
-    }
+    /***
+     *
+     * Get Wifi Scan Result and store them in both, a StringBuilder and a JsonObject. The first
+     * will serve when writing the into a txt file, while the later will be the one to send
+     * (Client/Server) into the machine learning model.
+     *
+     * @author Othmane
+     */
 
     public void onReceive(Context context, Intent intent) {
         int i =0;
@@ -72,9 +83,6 @@ class WifiReceiver extends BroadcastReceiver {
                 combined.add(String.valueOf(i), postData);
                 i++;
             }
-
-            System.out.println("JSON WIFI RECEIVER NO BOUCLE: ");
-            System.out.println(combined);
         }
     }
 

@@ -19,7 +19,6 @@ public class HTTPReqTask extends AsyncTask<Void, Void, Void> {
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestProperty("Content-Type", "application/json");
             urlConnection.setRequestMethod("GET");
-            //urlConnection.setDoOutput(true);
             urlConnection.setDoInput(true);
 
             int code = urlConnection.getResponseCode();

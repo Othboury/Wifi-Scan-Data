@@ -20,7 +20,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ *
+ * This class extends from AsyncTask
+ *
+ */
+
 public class HTTPReqTaskP extends AsyncTask<JsonObject, Void, Void> {
+    /**
+     *
+     * Function that allows send a JsonObject through a POST to the python server handling the
+     * machine learning
+     *
+     * @author Othmane
+     */
+
     @Override
     protected Void doInBackground(JsonObject... jsonObjects) {
         HttpURLConnection urlConnection = null;

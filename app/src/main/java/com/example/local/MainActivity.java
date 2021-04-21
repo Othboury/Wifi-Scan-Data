@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
     private WifiManager wifiManager;
     private final int MY_PERMISSIONS_ACCESS_COARSE_LOCATION = 1;
     WifiReceiver receiverWifi;
-    private ArrayList<String> listWifi;
     EditText textRoom;
     EditText textFloor;
     EditText textBuilding;
@@ -85,6 +84,12 @@ public class MainActivity extends AppCompatActivity {
             wifiManager.setWifiEnabled(true);
         }
 
+        /**
+         *
+         * Handle the changes in the room's textfield
+         * @author Othmane
+         *
+         * */
         textRoom.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable arg0) {
@@ -103,6 +108,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        /**
+         *
+         * Handle the changes in the floor's textfield
+         * @author Othmane
+         *
+         * */
         textFloor.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -123,6 +134,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        /**
+         *
+         * Handle the changes in the building's textfield
+         * @author Othmane
+         *
+         * */
         textBuilding.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -139,10 +156,16 @@ public class MainActivity extends AppCompatActivity {
                 String buildingNumber = textBuilding.getText().toString();
                 enableBtnStartScan();
                 launchScan();
-                Toast.makeText(getApplicationContext(), "Batiment: " + buildingNumber, Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Bâtiment: " + buildingNumber, Toast.LENGTH_LONG).show();
             }
         });
 
+        /**
+         *
+         * Handle the onClick event on the Learning's button
+         * @author Othmane
+         *
+         * */
         httpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -151,14 +174,23 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void enableBtnStartScan(){
-        buttonScan.setEnabled(true);
-    }
-
+    /**
+     *
+     * Function to, respectively, enable the scan button, floor's textfield, building's textfield
+     * @author Othmane
+     *
+     * */
+    public void enableBtnStartScan(){ buttonScan.setEnabled(true); }
     public void enableTxtFloor(){textFloor.setEnabled(true);}
-
     public void enableTxtBuilding(){textBuilding.setEnabled(true);}
 
+    /**
+     *
+     * Function to check if the file exists in the phone's internal storage
+     * before creating it
+     *@author Othmane
+     *
+     * */
     public boolean fileExists(Context context, String filename) {
         File file = context.getFileStreamPath(filename);
         if(file == null || !file.exists()) {
@@ -167,10 +199,22 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     *
+     * Function to send the JsonObject through the server into the machine learning model
+     * @author Othmane
+     *
+     * */
     public void httpReq(){
         new HTTPReqTaskP().execute(receiverWifi.jsList());
     }
 
+    /**
+     *
+     * Function to launch the scan of the wifi networks
+     * @author Othmane
+     *
+     * */
     public void launchScan(){
         buttonScan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -187,6 +231,14 @@ public class MainActivity extends AppCompatActivity {
                     if(receiverWifi.ShowString() == null){
                         Toast.makeText(MainActivity.this, "EMPTY", Toast.LENGTH_SHORT).show();
                     }else{
+
+                        /**
+                         *
+                         * Fetching the Wi-Fi networks data from the WifiReceiver Class
+                         * And creating the header of the txt file
+                         * @author Othmane
+                         *
+                         * */
                         String sb =  receiverWifi.ShowString();
                         StringBuilder header = new StringBuilder();
                         header.append("batimentid").append(",").append("salleid").append(",").append("floorid").append(",")
@@ -194,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
                                 .append("bssid").append(",").append("level").append(",").append("centrefrequence0")
                                 .append(",").append("frequency");
 
-                        String fullRoomNumber = "";
+                        String fullRoomNumber;
                         if(roomNumber.length() == 1){
                             fullRoomNumber = "00"+ roomNumber;
                         }else if(roomNumber.length() ==2){
@@ -202,6 +254,13 @@ public class MainActivity extends AppCompatActivity {
                         }else{
                             fullRoomNumber = roomNumber;
                         }
+
+                        /**
+                         *
+                         * Replace the values of "salleid", "batimentid", "floorid" with
+                         * the values inserted in the textfield by the user
+                         * @author Othmane
+                         * */
 
                         filename = "salle-" + buildingNumber + fullRoomNumber + ".txt";
                         String dataToReplace = "N/A";
@@ -218,6 +277,13 @@ public class MainActivity extends AppCompatActivity {
                         Pattern patternBuilding = Pattern.compile(buildingToReplace);
                         Matcher matcherBuilding = patternBuilding.matcher(resultFloor);
                         resultBuilding = matcherBuilding.replaceAll(buildingNumber);
+
+                        /**
+                         *
+                         * Writing into the txt file and storing it in the phone's internal storage
+                         * @author Othmane
+                         * */
+
                         if(fileExists(MainActivity.this, filename)){
                             try {
                                 FileOutputStream fOut = openFileOutput(filename,  MODE_APPEND);
