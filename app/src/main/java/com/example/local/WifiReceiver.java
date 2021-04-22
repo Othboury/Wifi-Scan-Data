@@ -46,11 +46,8 @@ class WifiReceiver extends BroadcastReceiver {
         this.wifiDeviceList = wifiDeviceList;
     }
 
-    public WifiReceiver() {
-    }
 
     public void onReceive(Context context, Intent intent) {
-        int i =0;
         String action = intent.getAction();
         if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
             positionId++;
@@ -64,14 +61,8 @@ class WifiReceiver extends BroadcastReceiver {
                 JsonObject postData= new JsonObject();
                 //postData.addProperty("bssid",scanResult.BSSID);
                 postData.addProperty("level",scanResult.level);
-                System.out.println("JSON WIFI RECEIVER: ");
-                System.out.println(postData);
                 combined.add(scanResult.BSSID, postData);
-                //i++;
             }
-
-            System.out.println("JSON WIFI RECEIVER NO BOUCLE: ");
-            System.out.println(combined);
         }
     }
 
