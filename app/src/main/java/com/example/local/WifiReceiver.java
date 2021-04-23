@@ -73,8 +73,15 @@ class WifiReceiver extends BroadcastReceiver {
                         .append(",").append(scanResult.centerFreq0).append(",").append(scanResult.frequency);
 
                 JsonObject postData= new JsonObject();
+
                 postData.addProperty("level",scanResult.level);
                 combined.add(scanResult.BSSID, postData);
+                //postData.addProperty("bssid",scanResult.BSSID);
+                postData.addProperty("level",scanResult.level);
+                System.out.println("JSON WIFI RECEIVER: ");
+                System.out.println(postData);
+                combined.add(scanResult.BSSID, postData);
+                //i++;
             }
         }
     }
