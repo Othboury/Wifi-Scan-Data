@@ -206,6 +206,8 @@ public class MainActivity extends AppCompatActivity {
      *
      * */
     public void httpReq(){
+        launchScan();
+        System.out.println(receiverWifi.jsList());
         new HTTPReqTaskP().execute(receiverWifi.jsList());
     }
 
